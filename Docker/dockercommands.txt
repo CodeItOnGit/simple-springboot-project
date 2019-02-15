@@ -1,0 +1,31 @@
+#create a bridge network.
+docker network create webnet
+
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq)
+docker rmi $(docker image ls -q)
+
+# Build the docker image for the Spring boot.
+docker build -t anverma/fsp -f ./Docker/tomcat/Dockerfile .
+
+# Start the first container using the built image
+ docker run -d --network webnet --name fsp1 anverma/fsp 
+ 
+ # Start the second container using the built image
+ docker run -d --network webnet --name fsp2 anverma/fsp
+ 
+ 
+ #Build the docker image using NGINX Basic Load Balancer"
+ docker build -t anverma/fspbasicnginx -f ./Docker/nginx/Dockerfile .
+ 
+ #Start container 
+ docker run -d --name fspnginx -p 8080:8080  --network webnet anverma/fspbasicnginx
+ 
+ docker ps
+ 
+ docker logs anverma/fspbasicnginx
+ 
+ 
+ docker-machine ssh
+ 
+ docker exec -it fsp1 bash

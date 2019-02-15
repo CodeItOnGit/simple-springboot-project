@@ -1,0 +1,31 @@
+version: '3.2'
+services:
+  fsp1:
+      build:
+        context: .
+        dockerfile: ./Docker/tomcat/Dockerfile
+      image: anverma/fsp
+      tty: true
+      ports:
+          - '8000:8000'
+          - '8090:8080'
+     
+  fsp2:
+      build: 
+        context: .
+        dockerfile: ./Docker/tomcat/Dockerfile
+      image: anverma/fsp
+      tty: true
+      
+  loadbalancer:
+      build: 
+        context: .
+        dockerfile: ./Docker/nginx/Dockerfile
+      image: anverma/fspnginx
+      tty: true
+      links:
+          - fsp1
+          - fsp2
+      ports:
+          - '8080:8080'
+          
