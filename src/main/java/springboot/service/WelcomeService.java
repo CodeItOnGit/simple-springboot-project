@@ -22,4 +22,8 @@ public class WelcomeService{
 		
 		return "<HTML><BODY><H>Welcome to Server: <B>" + serverName + "</B></H></BODY></HTML>";
 	}
+
+	public void crashWithStatus(int exitCode){
+		System.exit(exitCode);
+	}
 }

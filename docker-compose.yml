@@ -1,31 +1,66 @@
-version: '3.2'
+# Very Important: Do not use tabs to indent the levels. Use only spaces. If you use tab you would get error when you try to run docker-compose.yml file
+#### USEFUL COMMANDS: To be run from the directory containing docker-compose.yml file ###
+# docker-compose up -d            :  Runs the services enlisted in composition
+# docker-compose up -d --build    :  Re-Build the images and runs the enlisted composition
+# docker-compose ps               :  Prints the status of containers enlisted in docker-compose file.
+
+#Specify the DOCKER COMPOSE VERSION TO BE USED
+version: '3.5'
+
+#Specify the named network else docker-compose creates the network based on the directory containing the compose file. In this case name will be dir_networkname
+networks:
+  springbootappnet:
+    driver: bridge
+    name: springbootappnetwork
+
+#Enlist the Services. They provide easy way to reference container by named service.
 services:
+# First Instance of the Service
   fsp1:
       build:
         context: .
+        # Refer to the docker file that would result in forming the image for the container.
         dockerfile: ./Docker/tomcat/Dockerfile
-      image: anverma/fsp
+      image: codeitongitorg/simplespringbootapp:${TAG}
       tty: true
+      #Use the named network while spinning up the container.
+      networks:
+        - springbootappnet
+    #Map the underlying container port to the Host machine Port. JVM is listening on port 8000 so open this port on container for it to be debuggable.
+    #Map the underlying container port to the Host machine Port. Open direct port to container so it can be directly reached by passing the load balancer. Helps in debugging.
       ports:
           - '8000:8000'
           - '8090:8080'
-     
+    #Set the container restart policy
+      restart : always
+
+# Second Instance of the Service
   fsp2:
       build: 
         context: .
         dockerfile: ./Docker/tomcat/Dockerfile
-      image: anverma/fsp
+      image: codeitongitorg/simplespringbootapp:${TAG}
       tty: true
-      
+      #Use the named network while spinning up the container.
+      networks:
+         - springbootappnet
+      #Set the container restart policy
+      restart : on-failure
+
+ #Load Balancer for 2 instance of the service....
   loadbalancer:
       build: 
         context: .
         dockerfile: ./Docker/nginx/Dockerfile
-      image: anverma/fspnginx
+      image: codeitongitorg/simplespringbootloadbalancer:${TAG}
       tty: true
+      #Use the named network while spinning up the container.
+      networks:
+          - springbootappnet
       links:
           - fsp1
           - fsp2
+      #Make NGINX port available on host machine. Underlying service container 8080 ports are not directly accessible outside. They can only be reached via NGINX.
       ports:
           - '8080:8080'
-          
+

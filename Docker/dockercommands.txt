@@ -9,7 +9,7 @@ docker rmi $(docker image ls -q)
 docker build -t anverma/fsp -f ./Docker/tomcat/Dockerfile .
 
 # Start the first container using the built image
- docker run -d --network webnet --name fsp1 anverma/fsp 
+ docker run -d --network webnet --name fsp1 -p 8090:8080 -p 8000:8000 --restart always anverma/fsp
  
  # Start the second container using the built image
  docker run -d --network webnet --name fsp2 anverma/fsp
@@ -23,9 +23,10 @@ docker build -t anverma/fsp -f ./Docker/tomcat/Dockerfile .
  
  docker ps
  
- docker logs anverma/fspbasicnginx
+ docker logs --tail 100 anverma/fsp1
  
  
  docker-machine ssh
  
  docker exec -it fsp1 bash
+
